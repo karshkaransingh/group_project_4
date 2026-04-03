@@ -7,21 +7,24 @@ import 'sports_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
+  final int initialIndex;
 
-  const HomeScreen({super.key, required this.userId});
+  const HomeScreen({super.key, required this.userId, this.initialIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedIndex = 0;
+  late int selectedIndex;
 
   late List<Widget> pages;
 
   @override
   void initState() {
     super.initState();
+
+    selectedIndex = widget.initialIndex;
 
     pages = [
       SportsScreen(userId: widget.userId),

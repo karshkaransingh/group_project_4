@@ -1,44 +1,191 @@
 import 'package:flutter/material.dart';
 
-class WorkoutCompletedScreen extends StatelessWidget {
-  final String sportName;
+import 'home_screen.dart';
 
-  const WorkoutCompletedScreen({super.key, required this.sportName});
+class WorkoutCompletedScreen extends StatelessWidget {
+  final int userId;
+  final String sportName;
+  final int completedExercises;
+
+  const WorkoutCompletedScreen({
+    super.key,
+    required this.userId,
+    required this.sportName,
+    required this.completedExercises,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Workout Completed"), centerTitle: true),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.emoji_events, size: 100),
-              const SizedBox(height: 20),
-              Text(
-                "$sportName workout completed!",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 130,
+                  height: 130,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFD4F24C), Color(0xFF61D4C0)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_outlined,
+                    color: Colors.white,
+                    size: 64,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 15),
-              const Text(
-                "Great job! Keep going and stay consistent.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                },
-                child: const Text("Back to Home"),
-              ),
-            ],
+                const SizedBox(height: 24),
+
+                const Text(
+                  "Workout Complete!",
+                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+
+                const Text(
+                  "You crushed it! Your dedication shows!",
+                  style: TextStyle(fontSize: 20, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 22,
+                    vertical: 24,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E1E),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Column(
+                        children: [
+                          Text(
+                            completedExercises.toString(),
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF61D4C0),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Exercises",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                      Container(width: 1, height: 60, color: Colors.white12),
+                      Column(
+                        children: [
+                          Text(
+                            sportName,
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF61D4C0),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          const Text(
+                            "Sport",
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 22),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFD4F24C).withOpacity(0.25),
+                    ),
+                  ),
+                  child: const Text(
+                    '"The only bad workout is the one that didn\'t happen. You showed up and gave it your all!"',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 17, fontStyle: FontStyle.italic),
+                  ),
+                ),
+                const SizedBox(height: 26),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              HomeScreen(userId: userId, initialIndex: 3),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.trending_up),
+                    label: const Text(
+                      "View Progress",
+                      style: TextStyle(fontSize: 17),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF61D4C0),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeScreen(userId: userId),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.home_outlined),
+                    label: const Text(
+                      "Back to Home",
+                      style: TextStyle(fontSize: 17),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -123,47 +123,200 @@ class DBHelper {
 
   static Future<void> insertDefaultExercises(Database db) async {
     List<Exercise> exercises = [
+      // =========================
+      // BASKETBALL - OUTDOOR
+      // =========================
       Exercise(
         sportId: 1,
         name: "Dribbling Drill",
-        description: "Practice ball control and movement.",
+        description: "Practice ball control while moving around the court.",
         type: "outdoor",
-        duration: 5,
+        duration: 30,
       ),
       Exercise(
         sportId: 1,
-        name: "Wall Sit",
-        description: "Build lower body strength indoors.",
-        type: "indoor",
-        duration: 3,
+        name: "Layup Practice",
+        description:
+            "Practice right-hand and left-hand layups near the basket.",
+        type: "outdoor",
+        duration: 30,
       ),
+      Exercise(
+        sportId: 1,
+        name: "Shooting Drill",
+        description:
+            "Take repeated shots from different positions on the court.",
+        type: "outdoor",
+        duration: 60,
+      ),
+      Exercise(
+        sportId: 1,
+        name: "Passing Drill",
+        description: "Work on chest passes and bounce passes with accuracy.",
+        type: "outdoor",
+        duration: 90,
+      ),
+
+      // =========================
+      // BASKETBALL - INDOOR
+      // =========================
+      Exercise(
+        sportId: 1,
+        name: "Wall Sit",
+        description:
+            "Build leg strength and endurance for better court movement.",
+        type: "indoor",
+        duration: 30,
+      ),
+      Exercise(
+        sportId: 1,
+        name: "Squats",
+        description:
+            "Strengthen lower body muscles used in jumping and defense.",
+        type: "indoor",
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 1,
+        name: "Jumping Jacks",
+        description: "Improve stamina and warm up the full body indoors.",
+        type: "indoor",
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 1,
+        name: "High Knees",
+        description: "Boost speed, coordination, and cardio indoors.",
+        type: "indoor",
+        duration: 40,
+      ),
+
+      // =========================
+      // TENNIS - OUTDOOR
+      // =========================
       Exercise(
         sportId: 2,
         name: "Serve Practice",
-        description: "Practice tennis serves.",
+        description: "Practice consistent tennis serves with proper form.",
         type: "outdoor",
-        duration: 5,
+        duration: 20,
       ),
       Exercise(
         sportId: 2,
-        name: "Shadow Swings",
-        description: "Practice swings indoors.",
-        type: "indoor",
-        duration: 4,
+        name: "Forehand Rally",
+        description: "Improve your forehand control and accuracy.",
+        type: "outdoor",
+        duration: 30,
       ),
       Exercise(
-        sportId: 3,
-        name: "Squats",
-        description: "Build leg strength indoors.",
-        type: "indoor",
-        duration: 3,
+        sportId: 2,
+        name: "Backhand Rally",
+        description: "Practice backhand shots with balance and timing.",
+        type: "outdoor",
+        duration: 60,
       ),
+      Exercise(
+        sportId: 2,
+        name: "Footwork Cones",
+        description: "Move quickly through cones to improve court footwork.",
+        type: "outdoor",
+        duration: 40,
+      ),
+
+      // =========================
+      // TENNIS - INDOOR
+      // =========================
+      Exercise(
+        sportId: 2,
+        name: "Shadow Swings",
+        description: "Practice swing technique indoors without hitting a ball.",
+        type: "indoor",
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 2,
+        name: "Lunges",
+        description: "Strengthen legs for fast movement across the court.",
+        type: "indoor",
+        duration: 30,
+      ),
+      Exercise(
+        sportId: 2,
+        name: "Core Twists",
+        description: "Build core strength for stronger and more stable shots.",
+        type: "indoor",
+        duration: 30,
+      ),
+      Exercise(
+        sportId: 2,
+        name: "Jump Rope",
+        description: "Improve rhythm, stamina, and foot speed indoors.",
+        type: "indoor",
+        duration: 60,
+      ),
+
+      // =========================
+      // SOCCER - OUTDOOR
+      // =========================
       Exercise(
         sportId: 3,
         name: "Passing Drill",
-        description: "Practice passing accuracy.",
+        description: "Practice accurate short and long passes on the field.",
         type: "outdoor",
-        duration: 5,
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Dribbling Through Cones",
+        description: "Weave through cones to improve ball control and agility.",
+        type: "outdoor",
+        duration: 30,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Shooting Practice",
+        description: "Take repeated shots on goal to improve finishing.",
+        type: "outdoor",
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Sprint Intervals",
+        description: "Build speed and endurance with short sprint sets.",
+        type: "outdoor",
+        duration: 20,
+      ),
+
+      // =========================
+      // SOCCER - INDOOR
+      // =========================
+      Exercise(
+        sportId: 3,
+        name: "Squats",
+        description: "Build leg strength for running, shooting, and balance.",
+        type: "indoor",
+        duration: 20,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Plank Hold",
+        description: "Strengthen the core for better balance and stability.",
+        type: "indoor",
+        duration: 30,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Mountain Climbers",
+        description: "Improve cardio, coordination, and lower body movement.",
+        type: "indoor",
+        duration: 40,
+      ),
+      Exercise(
+        sportId: 3,
+        name: "Toe Taps",
+        description: "Practice quick foot movement and coordination indoors.",
+        type: "indoor",
+        duration: 30,
       ),
     ];
 
@@ -265,12 +418,21 @@ class DBHelper {
 
     return await db.rawQuery(
       '''
-      SELECT history.id, history.sportId, sports.name AS sportName, exercises.name AS exerciseName, history.date
-      FROM history
-      INNER JOIN sports ON history.sportId = sports.id
-      INNER JOIN exercises ON history.exerciseId = exercises.id
-      WHERE history.userId = ?
-      ''',
+    SELECT 
+      history.id,
+      history.sportId,
+      history.exerciseId,
+      history.date,
+      sports.name AS sportName,
+      exercises.name AS exerciseName,
+      exercises.type,
+      exercises.duration
+    FROM history
+    INNER JOIN sports ON history.sportId = sports.id
+    INNER JOIN exercises ON history.exerciseId = exercises.id
+    WHERE history.userId = ?
+    ORDER BY history.date DESC
+    ''',
       [userId],
     );
   }

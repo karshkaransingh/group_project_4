@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../database/db_helper.dart';
-import 'exercise_screen.dart';
+import 'weather_workout_screen.dart';
 
 class SportsScreen extends StatefulWidget {
   final int userId;
@@ -103,7 +103,7 @@ class _SportsScreenState extends State<SportsScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ExerciseScreen(
+                  builder: (context) => WeatherWorkoutScreen(
                     userId: widget.userId,
                     sportId: sport['id'],
                     sportName: sport['name'],

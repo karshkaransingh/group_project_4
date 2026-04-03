@@ -9,12 +9,16 @@ class ExerciseScreen extends StatefulWidget {
   final int userId;
   final int sportId;
   final String sportName;
+  final String weatherType;
+  final String styleName;
 
   const ExerciseScreen({
     super.key,
     required this.userId,
     required this.sportId,
     required this.sportName,
+    required this.weatherType,
+    required this.styleName,
   });
 
   @override
@@ -25,11 +29,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   List<Map<String, dynamic>> exercises = [];
   bool isLoading = true;
 
+  int currentIndex = 0;
+
   Timer? timer;
-  ValueNotifier<int> remainingSeconds = ValueNotifier<int>(0);
+  final ValueNotifier<int> remainingSeconds = ValueNotifier<int>(0);
   bool isRunning = false;
-  int selectedExerciseId = -1;
-  String selectedExerciseName = "";
+  bool currentExerciseCompleted = false;
+
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -41,11 +48,21 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   void dispose() {
     timer?.cancel();
     remainingSeconds.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   Future<void> loadExercises() async {
-    exercises = await DBHelper.getExercisesBySport(widget.sportId);
+    List<Map<String, dynamic>> allExercises =
+        await DBHelper.getExercisesBySport(widget.sportId);
+
+    exercises = allExercises
+        .where((exercise) => exercise["type"] == widget.weatherType)
+        .toList();
+
+    if (exercises.isNotEmpty) {
+      remainingSeconds.value = exercises[0]["duration"]; // seconds
+    }
 
     if (!mounted) return;
 
@@ -54,73 +71,57 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     });
   }
 
-  Future<void> completeExercise(int exerciseId) async {
+  Future<void> completeCurrentExercise() async {
+    if (exercises.isEmpty) return;
+
+    int exerciseId = exercises[currentIndex]["id"];
+
     bool alreadyCompleted = await DBHelper.isExerciseAlreadyCompleted(
       widget.userId,
       widget.sportId,
       exerciseId,
     );
 
-    if (alreadyCompleted) {
-      if (!mounted) return;
+    if (!alreadyCompleted) {
+      String date = DateTime.now().toString();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("This exercise is already completed")),
+      await DBHelper.addHistory(
+        widget.userId,
+        widget.sportId,
+        exerciseId,
+        date,
       );
-      return;
     }
-
-    String date = DateTime.now().toString();
-
-    await DBHelper.addHistory(widget.userId, widget.sportId, exerciseId, date);
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Exercise saved in history")));
-  }
-
-  void startExerciseTimer(
-    int exerciseId,
-    String exerciseName,
-    int durationInMinutes,
-  ) {
-    timer?.cancel();
-
-    setState(() {
-      selectedExerciseId = exerciseId;
-      selectedExerciseName = exerciseName;
-      remainingSeconds.value = durationInMinutes * 60;
-      isRunning = false;
-    });
   }
 
   void startTimer() {
-    if (remainingSeconds.value <= 0) return;
+    if (remainingSeconds.value <= 0 || currentExerciseCompleted) return;
 
     timer?.cancel();
 
-    timer = Timer.periodic(const Duration(seconds: 1), (t) {
+    setState(() {
+      isRunning = true;
+    });
+
+    timer = Timer.periodic(const Duration(seconds: 1), (t) async {
       if (remainingSeconds.value > 0) {
         remainingSeconds.value--;
-
-        if (!isRunning && mounted) {
-          setState(() {
-            isRunning = true;
-          });
-        }
       } else {
         t.cancel();
+
+        await completeCurrentExercise();
 
         if (!mounted) return;
 
         setState(() {
           isRunning = false;
+          currentExerciseCompleted = true;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("$selectedExerciseName timer completed")),
+          SnackBar(
+            content: Text("${exercises[currentIndex]['name']} completed"),
+          ),
         );
       }
     });
@@ -137,11 +138,81 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   void resetTimer() {
     timer?.cancel();
 
+    if (exercises.isEmpty) return;
+
     setState(() {
-      remainingSeconds.value = 0;
+      remainingSeconds.value = exercises[currentIndex]["duration"]; // seconds
       isRunning = false;
-      selectedExerciseId = -1;
-      selectedExerciseName = "";
+      currentExerciseCompleted = false;
+    });
+  }
+
+  Future<void> goToNextExercise() async {
+    timer?.cancel();
+
+    if (currentIndex < exercises.length - 1) {
+      await _pageController.nextPage(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      int completedCount = await DBHelper.getCompletedExercisesCount(
+        widget.userId,
+        widget.sportId,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WorkoutCompletedScreen(
+            userId: widget.userId,
+            sportName: widget.sportName,
+            completedExercises: completedCount,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> skipExercise() async {
+    timer?.cancel();
+
+    if (currentIndex < exercises.length - 1) {
+      await _pageController.nextPage(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      int completedCount = await DBHelper.getCompletedExercisesCount(
+        widget.userId,
+        widget.sportId,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WorkoutCompletedScreen(
+            userId: widget.userId,
+            sportName: widget.sportName,
+            completedExercises: completedCount,
+          ),
+        ),
+      );
+    }
+  }
+
+  void onExerciseChanged(int index) {
+    timer?.cancel();
+
+    setState(() {
+      currentIndex = index;
+      remainingSeconds.value = exercises[currentIndex]["duration"]; // seconds
+      isRunning = false;
+      currentExerciseCompleted = false;
     });
   }
 
@@ -155,117 +226,241 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     return "$minText:$secText";
   }
 
+  double getProgressValue() {
+    if (exercises.isEmpty) return 0;
+    return (currentIndex + 1) / exercises.length;
+  }
+
+  Widget buildDots() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(exercises.length, (index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: currentIndex == index ? 18 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: currentIndex == index ? Colors.yellow : Colors.grey,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        );
+      }),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (exercises.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.sportName)),
+        body: Center(child: Text("No ${widget.weatherType} exercises found")),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.sportName)),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : exercises.isEmpty
-          ? const Center(child: Text("No exercises found"))
-          : Column(
-              children: [
-                if (selectedExerciseId != -1)
-                  Card(
-                    margin: const EdgeInsets.all(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+      appBar: AppBar(
+        title: Text(widget.sportName),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  widget.styleName,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Exercise ${currentIndex + 1} of ${exercises.length}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  Text(
+                    "${(getProgressValue() * 100).toStringAsFixed(0)}%",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              LinearProgressIndicator(
+                value: getProgressValue(),
+                minHeight: 8,
+                borderRadius: BorderRadius.circular(20),
+              ),
+
+              const SizedBox(height: 20),
+
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: onExerciseChanged,
+                  itemCount: exercises.length,
+                  itemBuilder: (context, index) {
+                    final exercise = exercises[index];
+
+                    return SingleChildScrollView(
                       child: Column(
                         children: [
-                          Text(
-                            selectedExerciseName,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                          Container(
+                            width: double.infinity,
+                            height: 170,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.grey.shade300,
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.play_circle_outline,
+                                    size: 70,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text("Video: ${exercise["name"]}"),
+                                ],
+                              ),
                             ),
                           ),
+
+                          const SizedBox(height: 22),
+
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              exercise["name"],
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
                           const SizedBox(height: 10),
-                          ValueListenableBuilder<int>(
-                            valueListenable: remainingSeconds,
-                            builder: (context, value, child) {
-                              return Text(
-                                formatTime(value),
+
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              exercise["description"],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          if (index == currentIndex)
+                            ValueListenableBuilder<int>(
+                              valueListenable: remainingSeconds,
+                              builder: (context, value, child) {
+                                return Container(
+                                  width: 150,
+                                  height: 150,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.yellow,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    formatTime(value),
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                );
+                              },
+                            )
+                          else
+                            Container(
+                              width: 150,
+                              height: 150,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.yellow,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                formatTime(exercise["duration"]),
                                 style: const TextStyle(
-                                  fontSize: 32,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black,
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: startTimer,
-                                child: const Text("Start"),
                               ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: pauseTimer,
-                                child: const Text("Pause"),
-                              ),
-                              const SizedBox(width: 10),
-                              ElevatedButton(
-                                onPressed: resetTimer,
-                                child: const Text("Reset"),
-                              ),
-                            ],
-                          ),
+                            ),
+
+                          const SizedBox(height: 28),
                         ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              ElevatedButton.icon(
+                onPressed: currentExerciseCompleted
+                    ? null
+                    : (isRunning ? pauseTimer : startTimer),
+                icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
+                label: Text(isRunning ? "Pause" : "Start"),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 52),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: skipExercise,
+                      child: const Text("Skip Exercise"),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: currentExerciseCompleted
+                          ? goToNextExercise
+                          : null,
+                      child: Text(
+                        currentIndex == exercises.length - 1
+                            ? "Finish Workout"
+                            : "Next Exercise",
                       ),
                     ),
                   ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: exercises.length,
-                    itemBuilder: (context, index) {
-                      var exercise = exercises[index];
+                ],
+              ),
 
-                      return Card(
-                        margin: const EdgeInsets.all(10),
-                        child: ListTile(
-                          title: Text(exercise['name']),
-                          subtitle: Text(
-                            "${exercise['description']}\nType: ${exercise['type']} | Duration: ${exercise['duration']} min",
-                          ),
-                          isThreeLine: true,
-                          onTap: () {
-                            startExerciseTimer(
-                              exercise['id'],
-                              exercise['name'],
-                              exercise['duration'],
-                            );
-                          },
-                          trailing: ElevatedButton(
-                            onPressed: () async {
-                              await completeExercise(exercise['id']);
-                            },
-                            child: const Text("Done"),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkoutCompletedScreen(
-                            sportName: widget.sportName,
-                          ),
-                        ),
-                      );
-                    },
-                    child: const Text("Finish Workout"),
-                  ),
-                ),
-              ],
-            ),
+              const SizedBox(height: 14),
+              buildDots(),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

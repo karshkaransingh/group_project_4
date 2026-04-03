@@ -1,31 +1,47 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  static String apiKey = "1232c44c5ae6dfca21000804cd673892";
+  static const String apiKey = "1232c44c5ae6dfca21000804cd673892";
 
-  static Future<String> getWeatherType(String city) async {
-    String url =
-        "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey";
+  static Future<Map<String, dynamic>> getWeatherData(String city) async {
+    try {
+      final url =
+          "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=$apiKey&units=metric";
 
-    Uri uri = Uri.parse(url);
-    http.Response response = await http.get(uri);
+      final response = await http.get(Uri.parse(url));
 
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = jsonDecode(response.body);
-
-      String mainWeather = data['weather'][0]['main'];
-
-      if (mainWeather == "Rain" ||
-          mainWeather == "Thunderstorm" ||
-          mainWeather == "Snow") {
-        return "indoor";
-      } else {
-        return "outdoor";
+      if (response.statusCode != 200) {
+        return {"success": false};
       }
-    } else {
-      return "indoor";
+
+      final data = jsonDecode(response.body);
+
+      final mainWeather = data["weather"][0]["main"].toString();
+      final icon = data["weather"][0]["icon"].toString();
+      final temperature = (data["main"]["temp"] as num).toDouble();
+      final cityName = data["name"].toString();
+
+      final badWeather =
+          mainWeather == "Rain" ||
+          mainWeather == "Snow" ||
+          mainWeather == "Thunderstorm" ||
+          mainWeather == "Clouds";
+
+      return {
+        "success": true,
+        "city": cityName,
+        "temperature": temperature,
+        "mainWeather": mainWeather,
+        "icon": icon,
+        "workoutType": badWeather ? "indoor" : "outdoor",
+        "styleName": badWeather ? "Home Style" : "Athletic Style",
+        "message": badWeather
+            ? "Weather is not good for outdoor training!"
+            : "Perfect weather for outdoor training!",
+      };
+    } catch (e) {
+      return {"success": false};
     }
   }
 }
