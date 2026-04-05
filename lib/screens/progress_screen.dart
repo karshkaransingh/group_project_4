@@ -219,11 +219,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(22),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF61D4C0), Color(0xFF8BE3D0)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: Color(0xFF8BE3D0),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,38 +320,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-
-              SizedBox(
-                height: 58,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            HistoryScreen(userId: widget.userId),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.history),
-                  label: const Text(
-                    "View & Manage Exercise History",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.white10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 26),
 
               const Text(
                 "By Sport",

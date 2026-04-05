@@ -17,16 +17,15 @@ class WeatherService {
 
       final data = jsonDecode(response.body);
 
-      final mainWeather = data["weather"][0]["main"].toString();
-      final icon = data["weather"][0]["icon"].toString();
-      final temperature = (data["main"]["temp"] as num).toDouble();
-      final cityName = data["name"].toString();
+      final String mainWeather = data["weather"][0]["main"].toString();
+      final String icon = data["weather"][0]["icon"].toString();
+      final double temperature = (data["main"]["temp"] as num).toDouble();
+      final String cityName = data["name"].toString();
 
-      final badWeather =
+      final bool badWeather =
           mainWeather == "Rain" ||
           mainWeather == "Snow" ||
-          mainWeather == "Thunderstorm" ||
-          mainWeather == "Clouds";
+          mainWeather == "Thunderstorm";
 
       return {
         "success": true,
@@ -37,8 +36,8 @@ class WeatherService {
         "workoutType": badWeather ? "indoor" : "outdoor",
         "styleName": badWeather ? "Home Style" : "Athletic Style",
         "message": badWeather
-            ? "Weather is not good for outdoor training!"
-            : "Perfect weather for outdoor training!",
+            ? "Weather is not good for outdoor training! Indoor exercises are better for today."
+            : "Perfect weather for outdoor training! The conditions are ideal for maximum performance.",
       };
     } catch (e) {
       return {"success": false};

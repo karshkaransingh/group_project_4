@@ -17,7 +17,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
   bool isLoading = true;
 
   String selectedSport = "All Sports";
-  String selectedStyle = "All Styles";
 
   @override
   void initState() {
@@ -41,14 +40,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       bool sportMatch =
           selectedSport == "All Sports" || item['sportName'] == selectedSport;
 
-      String styleName = item['type'] == "outdoor"
-          ? "Athletic Style"
-          : "Home Style";
-
-      bool styleMatch =
-          selectedStyle == "All Styles" || styleName == selectedStyle;
-
-      return sportMatch && styleMatch;
+      return sportMatch;
     }).toList();
   }
 
@@ -185,114 +177,108 @@ class _HistoryScreenState extends State<HistoryScreen> {
         : "Home Style";
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 18),
+
       padding: const EdgeInsets.all(18),
+
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.black),
       ),
+
       child: Column(
         children: [
           Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 62,
+                height: 62,
+
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: const Color(0xFF61D4C0),
+                  shape: BoxShape.circle,
+
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF61D4C0), Color(0xFFD4F24C)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                 ),
+
                 child: Icon(
                   getSportIcon(item['sportName']),
                   color: Colors.white,
-                  size: 28,
+                  size: 30,
                 ),
               ),
-              const SizedBox(width: 14),
+
+              const SizedBox(width: 16),
 
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+
                   children: [
                     Text(
                       item['exerciseName'],
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      "${item['sportName']} • $styleName",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Row(
                       children: [
+                        const Icon(Icons.access_time, size: 16),
+
+                        const SizedBox(width: 4),
+
                         Text(
-                          item['sportName'],
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const Text("•", style: TextStyle(color: Colors.black)),
-                        Text(
-                          styleName,
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const Text("•", style: TextStyle(color: Colors.black)),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.access_time,
-                              size: 16,
-                              color: Colors.black,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              formatDuration(item['duration']),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                          formatDuration(item['duration']),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 18),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                formatTimeText(item['date']),
-                style: const TextStyle(color: Colors.black, fontSize: 16),
-              ),
               TextButton.icon(
                 onPressed: () async {
                   await removeHistory(item['id']);
                 },
+
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
+
                 label: const Text(
                   "Delete",
                   style: TextStyle(
                     color: Colors.red,
-                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
+          ),
+
+          const SizedBox(height: 14),
+
+          Align(
+            alignment: Alignment.centerLeft,
+
+            child: Text(
+              formatTimeText(item['date']),
+              style: const TextStyle(fontSize: 15),
+            ),
           ),
         ],
       ),
@@ -373,24 +359,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  Expanded(
-                    child: buildFilterDropdown(
-                      value: selectedStyle,
-                      items: const [
-                        "All Styles",
-                        "Athletic Style",
-                        "Home Style",
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          selectedStyle = value;
-                          applyFilters();
-                        });
-                      },
-                    ),
-                  ),
                 ],
               ),
 

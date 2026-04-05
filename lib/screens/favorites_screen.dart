@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../database/db_helper.dart';
 import 'home_screen.dart';
+import 'weather_workout_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   final int userId;
@@ -37,10 +38,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     await loadFavorites();
 
     if (!mounted) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("Favorite removed")));
   }
 
   Widget buildEmptyState() {
@@ -113,64 +110,82 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Widget buildFavoriteCard(Map<String, dynamic> favorite) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFFFF5A5F),
-            ),
-            child: const Icon(Icons.favorite, color: Colors.white, size: 30),
-          ),
-          const SizedBox(width: 16),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
 
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  favorite['name'],
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
+          MaterialPageRoute(
+            builder: (context) => WeatherWorkoutScreen(
+              userId: widget.userId,
+
+              sportId: favorite['sportId'],
+
+              sportName: favorite['name'],
+            ),
+          ),
+        );
+      },
+
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Color(0xFFFF5A5F)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFFF5A5F),
+              ),
+              child: const Icon(Icons.favorite, color: Colors.white, size: 30),
+            ),
+            const SizedBox(width: 16),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    favorite['name'],
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  favorite['description'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                    height: 1.3,
+                  const SizedBox(height: 6),
+                  Text(
+                    favorite['description'],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                      height: 1.3,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(width: 10),
+            const SizedBox(width: 10),
 
-          IconButton(
-            onPressed: () async {
-              await removeFavorite(favorite['id']);
-            },
-            icon: const Icon(
-              Icons.delete_outline,
-              color: Colors.redAccent,
-              size: 28,
+            IconButton(
+              onPressed: () async {
+                await removeFavorite(favorite['id']);
+              },
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.redAccent,
+                size: 28,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

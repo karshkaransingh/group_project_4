@@ -177,6 +177,7 @@ class WorkoutCompletedScreen extends StatelessWidget {
                     ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.white,
+                      backgroundColor: Colors.grey,
                       side: const BorderSide(color: Colors.white12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),

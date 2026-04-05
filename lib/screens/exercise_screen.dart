@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:group_project_4/main.dart';
 
 import '../database/db_helper.dart';
 import 'workout_completed_screen.dart';
@@ -240,7 +241,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           width: currentIndex == index ? 18 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: currentIndex == index ? Colors.yellow : Colors.grey,
+            color: currentIndex == index
+                ? const Color(0xFFD4F24C)
+                : Colors.grey,
             borderRadius: BorderRadius.circular(10),
           ),
         );
@@ -263,6 +266,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFF61D4C0),
+        foregroundColor: Colors.white,
         title: Text(widget.sportName),
         actions: [
           IconButton(
@@ -282,7 +287,11 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   widget.styleName,
-                  style: const TextStyle(fontSize: 16),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF29433E),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -304,6 +313,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
               LinearProgressIndicator(
                 value: getProgressValue(),
+                color: const Color(0xFF61D4C0),
+                backgroundColor: const Color(0xFFD9F3EC),
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -326,7 +337,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             height: 170,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: Colors.grey.shade300,
+                              color: const Color(0xFFE8F7F3),
                             ),
                             child: Center(
                               child: Column(
@@ -377,7 +388,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                   height: 150,
                                   decoration: const BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: Colors.yellow,
+                                    color: Color(0xFFD4F24C),
                                   ),
                                   alignment: Alignment.center,
                                   child: Text(
@@ -397,7 +408,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                               height: 150,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.yellow,
+                                color: Color(0xFFD4F24C),
                               ),
                               alignment: Alignment.center,
                               child: Text(
@@ -426,6 +437,8 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 label: Text(isRunning ? "Pause" : "Start"),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 52),
+                  backgroundColor: const Color(0xFF61D4C0),
+                  foregroundColor: Colors.white,
                 ),
               ),
 
@@ -435,13 +448,24 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: const Color(0xFF61D4C0),
+                        side: const BorderSide(color: Color(0xFF61D4C0)),
+                      ),
                       onPressed: skipExercise,
-                      child: const Text("Skip Exercise"),
+                      child: const Text(
+                        "Skip Exercise",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF61D4C0),
+                        foregroundColor: Colors.white,
+                      ),
                       onPressed: currentExerciseCompleted
                           ? goToNextExercise
                           : null,

@@ -31,98 +31,72 @@ class _WeatherWorkoutScreenState extends State<WeatherWorkoutScreen> {
   }
 
   Future<void> loadWeather() async {
-    final data = await WeatherService.getWeatherData("Winnipeg");
+    final data = await WeatherService.getWeatherData("Waterloo");
 
     if (!mounted) return;
 
     setState(() {
-      if (data["success"] == true) {
-        weatherData = data;
-        errorMessage = "";
-      } else {
-        weatherData = null;
-        errorMessage = "Could not load weather.";
-      }
+      weatherData = data["success"] == true ? data : null;
       isLoading = false;
     });
   }
 
   String getWeatherBackground() {
     if (weatherData == null) {
-      return "https://images.unsplash.com/photo-1500375592092-40eb2168fd21";
+      return "assets/images/weather/null.png";
     }
 
-    String weather = weatherData!["mainWeather"].toString().toLowerCase();
+    final weather = weatherData!["mainWeather"].toString().toLowerCase();
 
     switch (weather) {
       case "rain":
       case "drizzle":
-        return "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0";
+        return "assets/images/weather/rain.png";
 
       case "snow":
-        return "https://images.unsplash.com/photo-1483664852095-d6cc6870702d";
+        return "assets/images/weather/snow.png";
 
       case "clouds":
-        return "https://images.unsplash.com/photo-1534088568595-a066f410bcda";
+        return "assets/images/weather/clouds.png";
 
       case "fog":
       case "mist":
       case "haze":
       case "smoke":
-        return "https://images.unsplash.com/photo-1487621167305-5d248087c724";
+        return "assets/images/weather/fog.png";
 
       case "clear":
-        return "https://images.unsplash.com/photo-1472145246862-b24cf25c4a36";
+        return "assets/images/weather/clear.png";
 
       case "thunderstorm":
-        return "https://images.unsplash.com/photo-1500674425229-f692875b0ab7";
+        return "assets/images/weather/thunderstorm.png";
 
       default:
-        return "https://images.unsplash.com/photo-1500375592092-40eb2168fd21";
+        return "assets/images/weather/null.png";
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Material(child: Center(child: CircularProgressIndicator()));
     }
 
-    if (errorMessage.isNotEmpty || weatherData == null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(errorMessage),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  isLoading = true;
-                  errorMessage = "";
-                });
-                loadWeather();
-              },
-              child: const Text("Try Again"),
-            ),
-          ],
-        ),
-      );
-    }
+    final String weatherName = weatherData?["mainWeather"]?.toString() ?? "";
+    final String city = weatherData?["city"]?.toString() ?? "";
+    final String icon = weatherData?["icon"]?.toString() ?? "";
+    final String styleName =
+        weatherData?["styleName"]?.toString() ?? "Indoor Training";
+    final String workoutType =
+        weatherData?["workoutType"]?.toString() ?? "indoor";
+    final String message =
+        weatherData?["message"]?.toString() ??
+        "Indoor exercises are recommended for now.";
+    final double temperature = ((weatherData?["temperature"] ?? 0) as num)
+        .toDouble();
 
-    final name = weatherData!["mainWeather"]?.toString() ?? "weather";
-    final city = weatherData!["city"]?.toString() ?? "Waterloo";
-    final icon = weatherData!["icon"]?.toString() ?? "01d";
-    final styleName = weatherData!["styleName"]?.toString() ?? "Athletic Style";
-    final workoutType = weatherData!["workoutType"]?.toString() ?? "outdoor";
-    final message =
-        weatherData!["message"]?.toString() ??
-        "Perfect weather for outdoor training! The conditions are ideal for maximum performance.";
-    final temperature =
-        (weatherData!["temperature"] as num?)?.toDouble() ?? 0.0;
-
-    return Container(
-      color: const Color(0xFFE9E9E9),
+    return Material(
+      color: const Color(0xFFF5F7F7),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(18, 28, 18, 26),
         child: Column(
@@ -130,184 +104,200 @@ class _WeatherWorkoutScreenState extends State<WeatherWorkoutScreen> {
             Text(
               "${widget.sportName} Training!",
               style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF2D2D2D),
-                decoration: TextDecoration.none,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-
             const SizedBox(height: 22),
 
+            // this contains the weather card
             Container(
               width: double.infinity,
-              height: 200,
+              height: 210,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
                 image: DecorationImage(
-                  image: NetworkImage(getWeatherBackground()),
+                  image: AssetImage(getWeatherBackground()),
                   fit: BoxFit.cover,
                 ),
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 2),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  color: Colors.black.withOpacity(0.18),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+              child: weatherData == null
+                  ? const SizedBox()
+                  : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        color: Colors.black.withOpacity(0.18),
+                      ),
+                      padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.navigation,
-                            color: Colors.white,
-                            size: 15,
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_outlined,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                city,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 6),
+                          const Spacer(),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${temperature.toStringAsFixed(0)}°C",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 60,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1,
+                                ),
+                              ),
+                              const Spacer(),
+                              Image.network(
+                                "https://openweathermap.org/img/wn/$icon@4x.png",
+                                width: 110,
+                                height: 110,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.wb_cloudy,
+                                    size: 72,
+                                    color: Colors.white,
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                           Text(
-                            city,
+                            weatherName,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.none,
                             ),
                           ),
                         ],
                       ),
-                      const Spacer(),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${temperature.toStringAsFixed(0)}°C",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 64,
-                              fontWeight: FontWeight.w600,
-                              height: 1,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
-                          const Spacer(),
-                          Image.network(
-                            "https://openweathermap.org/img/wn/$icon@4x.png",
-                            width: 110,
-                            height: 110,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.wb_cloudy,
-                                size: 72,
-                                color: Colors.black,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ],
+                    ),
+            ),
+
+            const SizedBox(height: 24),
+
+            if (weatherData != null)
+              // this contains the workout style
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  color: const Color(0xFF8BE3D0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    styleName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 28),
-
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF86D8C4),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Text(
-                styleName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF2E3A37),
-                  decoration: TextDecoration.none,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 28),
+            const SizedBox(height: 24),
 
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
               decoration: BoxDecoration(
-                color: const Color(0xFFE3E12F),
-                borderRadius: BorderRadius.circular(38),
+                borderRadius: BorderRadius.circular(30),
+                color: const Color(0xFF8BE3D0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
+                  // this contains the exercise description
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(20, 30, 20, 28),
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 26),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1B1B1F),
-                      borderRadius: BorderRadius.circular(34),
+                      color: const Color(0xFF61D4C0),
+                      borderRadius: BorderRadius.circular(26),
                     ),
                     child: Column(
                       children: [
                         Text(
-                          workoutType == "indoor"
+                          weatherData == null
+                              ? "Exercises"
+                              : workoutType == "indoor"
                               ? "Indoor Workout"
                               : "Outdoor Workout",
                           style: const TextStyle(
                             fontSize: 25,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            decoration: TextDecoration.none,
                           ),
                         ),
                         const SizedBox(height: 14),
                         Text(
-                          workoutType == "indoor"
-                              ? "Weather is not good for outdoor training! Indoor exercises are better for today."
-                              : "Perfect weather for outdoor training! The conditions are ideal for maximum performance.",
+                          message,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 16,
-                            color: Colors.white70,
+                            color: Colors.white,
                             height: 1.45,
-                            decoration: TextDecoration.none,
                           ),
                         ),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 20),
 
+                  // this contains start workout button
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF58C0A8),
-                        foregroundColor: const Color(0xFF2D4A45),
+                        backgroundColor: const Color(0xFF61D4C0),
+                        foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: () {
@@ -327,29 +317,25 @@ class _WeatherWorkoutScreenState extends State<WeatherWorkoutScreen> {
                       child: const Text(
                         "Start Workout",
                         style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.none,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 14),
 
+                  // this contains choose different sport button
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 52,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        backgroundColor: const Color(0xFFC6C23F),
-                        side: const BorderSide(
-                          color: Color(0xFF7A7730),
-                          width: 1.5,
-                        ),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.grey,
+
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: () {
@@ -359,8 +345,7 @@ class _WeatherWorkoutScreenState extends State<WeatherWorkoutScreen> {
                         "Choose Different Sport",
                         style: TextStyle(
                           fontSize: 17,
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.none,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),

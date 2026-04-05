@@ -50,10 +50,6 @@ class _SportsScreenState extends State<SportsScreen> {
       setState(() {
         favoriteSportIds.remove(sportId);
       });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Removed from favorites")));
     } else {
       await DBHelper.addFavorite(widget.userId, sportId);
 
@@ -62,10 +58,6 @@ class _SportsScreenState extends State<SportsScreen> {
       setState(() {
         favoriteSportIds.add(sportId);
       });
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Added to favorites")));
     }
   }
 
@@ -80,37 +72,72 @@ class _SportsScreenState extends State<SportsScreen> {
     }
 
     return ListView.builder(
+      padding: const EdgeInsets.all(16),
       itemCount: sports.length,
       itemBuilder: (context, index) {
-        var sport = sports[index];
-        bool isFavorite = favoriteSportIds.contains(sport['id']);
+        final sport = sports[index];
+        final bool isFavorite = favoriteSportIds.contains(sport['id']);
+        final String imagePath = sport['image'];
 
-        return Card(
-          margin: const EdgeInsets.all(10),
-          child: ListTile(
-            title: Text(sport['name']),
-            subtitle: Text(sport['description']),
-            trailing: IconButton(
-              onPressed: () async {
-                await toggleFavorite(sport['id']);
-              },
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : null,
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => WeatherWorkoutScreen(
+                  userId: widget.userId,
+                  sportId: sport['id'],
+                  sportName: sport['name'],
+                ),
+              ),
+            );
+          },
+          child: Container(
+            height: 180,
+            margin: const EdgeInsets.only(bottom: 18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
               ),
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => WeatherWorkoutScreen(
-                    userId: widget.userId,
-                    sportId: sport['id'],
-                    sportName: sport['name'],
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: Colors.black.withOpacity(0.35),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        sport['name'],
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
+                  IconButton(
+                    onPressed: () async {
+                      await toggleFavorite(sport['id']);
+                    },
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
