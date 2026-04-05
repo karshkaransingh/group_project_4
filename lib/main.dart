@@ -3,19 +3,15 @@ import 'package:flutter/material.dart';
 import 'database/db_helper.dart';
 import 'screens/splash_screen.dart';
 
-ValueNotifier<bool> isDarkMode = ValueNotifier(true);
+ValueNotifier<bool> isDarkMode = ValueNotifier(false);
 
-// white in dark mode, black in light mode
-Color colorwb = Colors.white;
+Color get colorbg => isDarkMode.value ? Colors.black : const Color(0xFFF5F7F7);
 
-// black in dark mode, white in light mode
-Color colorbw = Colors.black;
+Color get colortxt => isDarkMode.value ? Colors.white : Colors.black;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await DBHelper.getDatabase();
-
   runApp(const MyApp());
 }
 
@@ -24,13 +20,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<bool>(
       valueListenable: isDarkMode,
-
       builder: (context, value, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-
           home: const SplashScreen(),
         );
       },

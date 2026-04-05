@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:group_project_4/main.dart';
 
 import 'home_screen.dart';
 
@@ -17,6 +18,7 @@ class WorkoutCompletedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: colorbg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -43,9 +45,13 @@ class WorkoutCompletedScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                const Text(
+                Text(
                   "Workout Complete!",
-                  style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: colortxt,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
@@ -64,7 +70,7 @@ class WorkoutCompletedScreen extends StatelessWidget {
                     vertical: 24,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
+                    color: const Color.fromARGB(255, 41, 41, 41),
                     borderRadius: BorderRadius.circular(18),
                     border: Border.all(color: Colors.white12),
                   ),
@@ -84,7 +90,7 @@ class WorkoutCompletedScreen extends StatelessWidget {
                           const SizedBox(height: 6),
                           const Text(
                             "Exercises",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                            style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ],
                       ),
@@ -102,7 +108,7 @@ class WorkoutCompletedScreen extends StatelessWidget {
                           const SizedBox(height: 6),
                           const Text(
                             "Sport",
-                            style: TextStyle(fontSize: 16, color: Colors.grey),
+                            style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ],
                       ),

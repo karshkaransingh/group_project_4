@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../main.dart';
 import 'favorites_screen.dart';
 import 'history_screen.dart';
 import 'progress_screen.dart';
@@ -28,8 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     pages = [
       SportsScreen(userId: widget.userId),
+
       FavoritesScreen(userId: widget.userId),
+
       HistoryScreen(userId: widget.userId),
+
       ProgressScreen(userId: widget.userId),
     ];
   }
@@ -37,35 +41,74 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("SportFit"), centerTitle: true),
+      backgroundColor: colorbg,
+
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFD4F24C),
+
+        title: Text(
+          "SPORTFIT",
+
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+
+        centerTitle: true,
+
+        actions: [
+          IconButton(
+            onPressed: () {
+              isDarkMode.value = !isDarkMode.value;
+            },
+
+            icon: Icon(
+              isDarkMode.value ? Icons.light_mode : Icons.dark_mode,
+
+              color: colortxt,
+            ),
+          ),
+        ],
+      ),
+
       body: pages[selectedIndex],
+
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: colorbg,
+
+        selectedItemColor: Colors.black,
+
+        unselectedItemColor: Colors.grey,
+
         currentIndex: selectedIndex,
+
         onTap: (value) {
           setState(() {
             selectedIndex = value;
           });
         },
+
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.sports),
             label: "Sports",
-            backgroundColor: Colors.black,
+            backgroundColor: Color(0xFFD4F24C),
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: "Favorites",
-            backgroundColor: Colors.black,
+            backgroundColor: Color(0xFFD4F24C),
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: "History",
-            backgroundColor: Colors.black,
+            backgroundColor: Color(0xFFD4F24C),
           ),
+
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: "Progress",
-            backgroundColor: Colors.black,
+            backgroundColor: Color(0xFFD4F24C),
           ),
         ],
       ),

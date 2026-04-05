@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:group_project_4/main.dart';
 
 import '../database/db_helper.dart';
 
@@ -49,10 +50,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
     await loadHistory();
 
     if (!mounted) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text("History deleted")));
   }
 
   String formatDuration(int seconds) {
@@ -146,19 +143,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14),
+
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorbg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black),
+        border: Border.all(color: colortxt),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          dropdownColor: Colors.white,
+          dropdownColor: colorbg,
+
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black),
-          style: const TextStyle(
-            color: Colors.black,
+          icon: Icon(Icons.keyboard_arrow_down, color: colortxt),
+          style: TextStyle(
+            color: colortxt,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -178,15 +177,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
-
       padding: const EdgeInsets.all(18),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.black),
       ),
-
       child: Column(
         children: [
           Row(
@@ -194,71 +190,57 @@ class _HistoryScreenState extends State<HistoryScreen> {
               Container(
                 width: 62,
                 height: 62,
-
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-
                   gradient: const LinearGradient(
                     colors: [Color(0xFF61D4C0), Color(0xFFD4F24C)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
-
                 child: Icon(
                   getSportIcon(item['sportName']),
                   color: Colors.white,
                   size: 30,
                 ),
               ),
-
               const SizedBox(width: 16),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-
                   children: [
                     Text(
                       item['exerciseName'],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
-
                     const SizedBox(height: 4),
-
                     Text(
                       "${item['sportName']} • $styleName",
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
-
                     const SizedBox(height: 4),
-
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 16),
-
+                        Icon(Icons.access_time, size: 16, color: Colors.black),
                         const SizedBox(width: 4),
-
                         Text(
                           formatDuration(item['duration']),
-                          style: const TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-
               TextButton.icon(
                 onPressed: () async {
                   await removeHistory(item['id']);
                 },
-
                 icon: const Icon(Icons.delete_outline, color: Colors.red),
-
                 label: const Text(
                   "Delete",
                   style: TextStyle(
@@ -269,15 +251,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             ],
           ),
-
           const SizedBox(height: 14),
-
           Align(
             alignment: Alignment.centerLeft,
-
             child: Text(
               formatTimeText(item['date']),
-              style: const TextStyle(fontSize: 15),
+              style: TextStyle(fontSize: 15, color: Colors.black),
             ),
           ),
         ],
@@ -291,107 +270,109 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: loadHistory,
-          child: ListView(
-            padding: const EdgeInsets.all(18),
-            children: [
-              Row(
+    return ValueListenableBuilder<bool>(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        return Scaffold(
+          backgroundColor: colorbg,
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: loadHistory,
+              child: ListView(
+                padding: const EdgeInsets.all(18),
                 children: [
-                  const SizedBox(width: 4),
-                  const Icon(Icons.history, size: 34),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Exercise History",
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
+                  Row(
+                    children: [
+                      const SizedBox(width: 4),
+                      Icon(Icons.history, size: 34, color: colortxt),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Exercise History",
+                              style: TextStyle(
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
+                                color: colortxt,
+                              ),
+                            ),
+                            Text(
+                              "${history.length} exercises completed",
+                              style: TextStyle(fontSize: 18, color: colortxt),
+                            ),
+                          ],
                         ),
-                        Text(
-                          "${history.length} exercises completed",
-                          style: const TextStyle(
-                            fontSize: 18,
-                            color: Colors.black,
-                          ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Icon(Icons.filter_alt_outlined, color: colortxt),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Filters",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                          color: colortxt,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildFilterDropdown(
+                          value: selectedSport,
+                          items: getSportOptions(),
+                          onChanged: (value) {
+                            if (value == null) return;
+
+                            setState(() {
+                              selectedSport = value;
+                              applyFilters();
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Divider(color: colortxt),
+                  const SizedBox(height: 16),
+                  if (filteredHistory.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 50),
+                      child: Center(
+                        child: Text(
+                          "No exercise history yet",
+                          style: TextStyle(fontSize: 18, color: colortxt),
+                        ),
+                      ),
+                    )
+                  else ...[
+                    Text(
+                      formatHeaderDate(filteredHistory.first['date']),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: colortxt,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ...filteredHistory.map(buildHistoryCard),
+                  ],
                 ],
               ),
-
-              const SizedBox(height: 22),
-
-              const Row(
-                children: [
-                  Icon(Icons.filter_alt_outlined, color: Colors.black),
-                  SizedBox(width: 8),
-                  Text(
-                    "Filters",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 14),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: buildFilterDropdown(
-                      value: selectedSport,
-                      items: getSportOptions(),
-                      onChanged: (value) {
-                        if (value == null) return;
-
-                        setState(() {
-                          selectedSport = value;
-                          applyFilters();
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              const Divider(color: Colors.black),
-              const SizedBox(height: 16),
-
-              if (filteredHistory.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Center(
-                    child: Text(
-                      "No exercise history yet",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                )
-              else ...[
-                Text(
-                  formatHeaderDate(filteredHistory.first['date']),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ...filteredHistory.map(buildHistoryCard),
-              ],
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

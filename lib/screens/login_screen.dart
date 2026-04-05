@@ -54,6 +54,15 @@ class _LoginScreenState extends State<LoginScreen> {
       fillColor: Colors.white,
 
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+
+        borderSide: const BorderSide(
+          color: Color(0xFF61D4C0), // mint color
+          width: 2,
+        ),
+      ),
     );
   }
 

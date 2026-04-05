@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:group_project_4/main.dart';
 
 import '../database/db_helper.dart';
 import 'history_screen.dart';
@@ -127,7 +128,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +147,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ],
                 ),
               ),
-
               Text(
                 "${(item['percent'] as double).toStringAsFixed(0)}%",
                 style: const TextStyle(
@@ -179,170 +178,178 @@ class _ProgressScreenState extends State<ProgressScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: loadProgress,
-          child: ListView(
-            padding: const EdgeInsets.all(18),
-            children: [
-              Row(
+    return ValueListenableBuilder<bool>(
+      valueListenable: isDarkMode,
+      builder: (context, value, child) {
+        return Scaffold(
+          backgroundColor: colorbg,
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: loadProgress,
+              child: ListView(
+                padding: const EdgeInsets.all(18),
                 children: [
-                  const Expanded(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Your Progress",
+                              style: TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.bold,
+                                color: colortxt,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Track your journey",
+                              style: TextStyle(fontSize: 18, color: colortxt),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: loadProgress,
+                        icon: Icon(Icons.refresh, color: colortxt),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.all(22),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(22),
+                      color: Color(0xFF8BE3D0),
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Your Progress",
-                          style: TextStyle(
-                            fontSize: 34,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            Container(
+                              width: 62,
+                              height: 62,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.15),
+                              ),
+                              child: const Icon(
+                                Icons.trending_up,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Overall Progress",
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "All sports combined",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          "Track your journey",
-                          style: TextStyle(fontSize: 18, color: Colors.grey),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    getOverallCompleted().toString(),
+                                    style: const TextStyle(
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Total Exercises",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${getAverageCompletion().toStringAsFixed(0)}%",
+                                    style: const TextStyle(
+                                      fontSize: 34,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Average Completion",
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: loadProgress,
-                    icon: const Icon(Icons.refresh),
+                  const SizedBox(height: 18),
+                  Text(
+                    "By Sport",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: colortxt,
+                    ),
                   ),
+                  const SizedBox(height: 18),
+                  if (progressData.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(top: 50),
+                      child: Center(
+                        child: Text(
+                          "No progress available",
+                          style: TextStyle(fontSize: 18, color: colortxt),
+                        ),
+                      ),
+                    )
+                  else
+                    ...progressData.map(buildSportCard),
                 ],
               ),
-              const SizedBox(height: 18),
-
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(22),
-                  color: Color(0xFF8BE3D0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 62,
-                          height: 62,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.15),
-                          ),
-                          child: const Icon(
-                            Icons.trending_up,
-                            color: Colors.white,
-                            size: 30,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Overall Progress",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "All sports combined",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                getOverallCompleted().toString(),
-                                style: const TextStyle(
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                "Total Exercises",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${getAverageCompletion().toStringAsFixed(0)}%",
-                                style: const TextStyle(
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                "Average Completion",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              const Text(
-                "By Sport",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 18),
-
-              if (progressData.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 50),
-                  child: Center(
-                    child: Text(
-                      "No progress available",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                )
-              else
-                ...progressData.map(buildSportCard),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
