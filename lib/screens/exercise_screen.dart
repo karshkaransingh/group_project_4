@@ -93,7 +93,33 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         exerciseId,
         date,
       );
+
+      if (!mounted) return;
+
+      setState(() {
+        completedExercisesCount++;
+      });
     }
+  }
+
+  void showFinishBlockedMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Complete at least one exercise before finishing workout",
+        ),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void showFirstExerciseMessage() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("This is the first exercise"),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   void startTimer() {
@@ -158,6 +184,11 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         curve: Curves.easeInOut,
       );
     } else {
+      if (completedExercisesCount <= 0) {
+        showFinishBlockedMessage();
+        return;
+      }
+
       int completedCount = await DBHelper.getCompletedExercisesCount(
         widget.userId,
         widget.sportId,
@@ -178,6 +209,19 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     }
   }
 
+  Future<void> goToPreviousExercise() async {
+    timer?.cancel();
+
+    if (currentIndex > 0) {
+      await _pageController.previousPage(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      showFirstExerciseMessage();
+    }
+  }
+
   Future<void> skipExercise() async {
     timer?.cancel();
 
@@ -187,9 +231,11 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Complete at least one exercise")),
-      );
+      if (completedExercisesCount <= 0) {
+        showFinishBlockedMessage();
+      } else {
+        await goToNextExercise();
+      }
     }
   }
 
@@ -201,7 +247,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       remainingSeconds.value = exercises[currentIndex]["duration"];
       isRunning = false;
       currentExerciseCompleted = false;
-      completedExercisesCount++;
     });
   }
 
@@ -273,20 +318,14 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     return ValueListenableBuilder<bool>(
       valueListenable: isDarkMode,
       builder: (context, value, child) {
+        final bool isLastExercise = currentIndex == exercises.length - 1;
+
         return Scaffold(
           backgroundColor: colorbg,
           appBar: AppBar(
             backgroundColor: const Color(0xFF61D4C0),
             foregroundColor: Colors.white,
             title: Text(widget.sportName),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.close),
-              ),
-            ],
           ),
           body: SafeArea(
             child: Padding(
@@ -450,7 +489,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                     icon: Icon(isRunning ? Icons.pause : Icons.play_arrow),
                     label: Text(
                       isRunning ? "Pause" : "Start",
-                      style: TextStyle(fontSize: 20),
+                      style: const TextStyle(fontSize: 20),
                     ),
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
@@ -463,6 +502,19 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
                   Row(
                     children: [
+                      SizedBox(
+                        width: 52,
+                        height: 52,
+                        child: IconButton(
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFF61D4C0),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: goToPreviousExercise,
+                          icon: const Icon(Icons.arrow_back),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
@@ -480,21 +532,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF61D4C0),
+                            backgroundColor: isLastExercise
+                                ? (completedExercisesCount > 0
+                                      ? const Color(0xFF61D4C0)
+                                      : Colors.grey)
+                                : (currentExerciseCompleted
+                                      ? const Color(0xFF61D4C0)
+                                      : Colors.grey),
                             foregroundColor: colortxt,
                           ),
-
-                          onPressed:
-                              (currentExerciseCompleted ||
-                                  (currentIndex == exercises.length - 1 &&
-                                      completedExercisesCount > 0))
-                              ? goToNextExercise
-                              : null,
-
+                          onPressed: isLastExercise
+                              ? () {
+                                  if (completedExercisesCount <= 0) {
+                                    showFinishBlockedMessage();
+                                    return;
+                                  }
+                                  goToNextExercise();
+                                }
+                              : (currentExerciseCompleted
+                                    ? goToNextExercise
+                                    : null),
                           child: Text(
-                            currentIndex == exercises.length - 1
-                                ? "Finish Workout"
-                                : "Next Exercise",
+                            isLastExercise ? "Finish" : "Next Exercise",
                             style: TextStyle(
                               color: colortxt,
                               fontSize: 16,
