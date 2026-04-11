@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'database/db_helper.dart';
+import 'database/database_service.dart';
 import 'screens/splash_screen.dart';
 
 ValueNotifier<bool> isDarkMode = ValueNotifier(false);
@@ -11,7 +11,7 @@ Color get colortxt => isDarkMode.value ? Colors.white : Colors.black;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await DBHelper.getDatabase();
+  await DatabaseSevice.getDatabase();
   runApp(const MyApp());
 }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 import 'weather_workout_screen.dart';
 
 class SportsScreen extends StatefulWidget {
@@ -24,9 +24,9 @@ class _SportsScreenState extends State<SportsScreen> {
   }
 
   Future<void> loadData() async {
-    sports = await DBHelper.getSports();
+    sports = await DatabaseSevice.getSports();
 
-    List<Map<String, dynamic>> favorites = await DBHelper.getFavorites(
+    List<Map<String, dynamic>> favorites = await DatabaseSevice.getFavorites(
       widget.userId,
     );
 
@@ -43,7 +43,7 @@ class _SportsScreenState extends State<SportsScreen> {
     bool isFavorite = favoriteSportIds.contains(sportId);
 
     if (isFavorite) {
-      await DBHelper.removeFavoriteBySportId(widget.userId, sportId);
+      await DatabaseSevice.removeFavoriteBySportId(widget.userId, sportId);
 
       if (!mounted) return;
 
@@ -51,7 +51,7 @@ class _SportsScreenState extends State<SportsScreen> {
         favoriteSportIds.remove(sportId);
       });
     } else {
-      await DBHelper.addFavorite(widget.userId, sportId);
+      await DatabaseSevice.addFavorite(widget.userId, sportId);
 
       if (!mounted) return;
 

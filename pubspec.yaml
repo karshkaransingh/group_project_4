@@ -32,4 +32,9 @@ flutter:
   assets:
     - assets/images/
     - assets/images/weather/
-    - assets/videos/
+    - assets/images/exercises/basketball/indoor/
+    - assets/images/exercises/basketball/outdoor/
+    - assets/images/exercises/soccer/indoor/
+    - assets/images/exercises/soccer/outdoor/
+    - assets/images/exercises/tennis/indoor/
+    - assets/images/exercises/tennis/outdoor/

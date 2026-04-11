@@ -8,7 +8,7 @@ import '../models/sport.dart';
 import '../models/exercise.dart';
 import '../models/user.dart';
 
-class DBHelper {
+class DatabaseSevice {
   static Database? _database;
 
   static Future<Database> getDatabase() async {
@@ -16,8 +16,8 @@ class DBHelper {
       return _database!;
     }
 
-    Directory directory = await getApplicationDocumentsDirectory();
-    String path = join(directory.path, "sportfit.db");
+    Directory dbDirectory = await getApplicationDocumentsDirectory();
+    String path = join(dbDirectory.path, "sportfit.db");
 
     _database = await openDatabase(
       path,

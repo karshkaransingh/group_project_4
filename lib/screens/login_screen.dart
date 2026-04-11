@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 import 'home_screen.dart';
 import 'signup_screen.dart';
 
@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    var user = await DBHelper.signin(email, password);
+    var user = await DatabaseSevice.signin(email, password);
 
     if (user.isNotEmpty) {
       Navigator.pushReplacement(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 import '../models/user.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -30,7 +30,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     User user = User(username: username, email: email, password: password);
 
-    await DBHelper.signup(user);
+    await DatabaseSevice.signup(user);
 
     if (!mounted) return;
 

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:group_project_4/main.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 import 'workout_completed_screen.dart';
 
 class ExerciseScreen extends StatefulWidget {
@@ -54,9 +54,22 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     super.dispose();
   }
 
+  String getExerciseImage() {
+    String sportFolder = widget.sportName.toLowerCase();
+
+    String typeFolder = exercises[currentIndex]["type"];
+    // indoor or outdoor from DB
+
+    String exerciseFileName = exercises[currentIndex]["name"]
+        .toLowerCase()
+        .replaceAll(" ", "_");
+
+    return "assets/images/exercises/$sportFolder/$typeFolder/$exerciseFileName.png";
+  }
+
   Future<void> loadExercises() async {
     List<Map<String, dynamic>> allExercises =
-        await DBHelper.getExercisesBySport(widget.sportId);
+        await DatabaseSevice.getExercisesBySport(widget.sportId);
 
     exercises = allExercises
         .where((exercise) => exercise["type"] == widget.weatherType)
@@ -78,7 +91,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
 
     int exerciseId = exercises[currentIndex]["id"];
 
-    bool alreadyCompleted = await DBHelper.isExerciseAlreadyCompleted(
+    bool alreadyCompleted = await DatabaseSevice.isExerciseAlreadyCompleted(
       widget.userId,
       widget.sportId,
       exerciseId,
@@ -87,7 +100,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     if (!alreadyCompleted) {
       String date = DateTime.now().toString();
 
-      await DBHelper.addHistory(
+      await DatabaseSevice.addHistory(
         widget.userId,
         widget.sportId,
         exerciseId,
@@ -189,7 +202,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
         return;
       }
 
-      int completedCount = await DBHelper.getCompletedExercisesCount(
+      int completedCount = await DatabaseSevice.getCompletedExercisesCount(
         widget.userId,
         widget.sportId,
       );
@@ -383,23 +396,20 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             children: [
                               Container(
                                 width: double.infinity,
-                                height: 170,
+                                height: 200,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color: const Color(0xFFE8F7F3),
                                 ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.play_circle_outline,
-                                        size: 70,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Text("Video: ${exercise["name"]}"),
-                                    ],
-                                  ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Image.asset(
+                                  getExerciseImage(),
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Center(
+                                      child: Text(exercise["name"]),
+                                    );
+                                  },
                                 ),
                               ),
 

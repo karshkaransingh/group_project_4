@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project_4/main.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 
 class HistoryScreen extends StatefulWidget {
   final int userId;
@@ -26,7 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> loadHistory() async {
-    history = await DBHelper.getHistory(widget.userId);
+    history = await DatabaseSevice.getHistory(widget.userId);
     applyFilters();
 
     if (!mounted) return;
@@ -46,7 +46,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> removeHistory(int historyId) async {
-    await DBHelper.deleteHistory(historyId);
+    await DatabaseSevice.deleteHistory(historyId);
     await loadHistory();
 
     if (!mounted) return;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project_4/main.dart';
 
-import '../database/db_helper.dart';
+import '../database/database_service.dart';
 import 'home_screen.dart';
 import 'weather_workout_screen.dart';
 
@@ -25,7 +25,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> loadFavorites() async {
-    favorites = await DBHelper.getFavorites(widget.userId);
+    favorites = await DatabaseSevice.getFavorites(widget.userId);
 
     if (!mounted) return;
 
@@ -35,7 +35,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> removeFavorite(int favoriteId) async {
-    await DBHelper.deleteFavorite(favoriteId);
+    await DatabaseSevice.deleteFavorite(favoriteId);
     await loadFavorites();
 
     if (!mounted) return;

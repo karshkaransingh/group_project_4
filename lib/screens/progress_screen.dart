@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:group_project_4/main.dart';
 
-import '../database/db_helper.dart';
-import 'history_screen.dart';
+import '../database/database_service.dart';
 
 class ProgressScreen extends StatefulWidget {
   final int userId;
@@ -25,15 +24,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
   }
 
   Future<void> loadProgress() async {
-    sports = await DBHelper.getSports();
+    sports = await DatabaseSevice.getSports();
 
     progressData = [];
 
     for (int i = 0; i < sports.length; i++) {
       int sportId = sports[i]['id'];
 
-      int totalExercises = await DBHelper.getTotalExercisesCount(sportId);
-      int completedExercises = await DBHelper.getCompletedExercisesCount(
+      int totalExercises = await DatabaseSevice.getTotalExercisesCount(sportId);
+      int completedExercises = await DatabaseSevice.getCompletedExercisesCount(
         widget.userId,
         sportId,
       );
