@@ -5,7 +5,7 @@ import 'screens/splash_screen.dart';
 
 ValueNotifier<bool> isDarkMode = ValueNotifier(false);
 
-Color get colorbg => isDarkMode.value ? Colors.black : const Color(0xFFF5F7F7);
+Color get colorbg => isDarkMode.value ? Colors.black : Colors.white;
 
 Color get colortxt => isDarkMode.value ? Colors.white : Colors.black;
 
