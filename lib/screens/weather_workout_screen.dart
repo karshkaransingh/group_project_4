@@ -35,6 +35,7 @@ class _WeatherWorkoutScreenState extends State<WeatherWorkoutScreen> {
     "Mississauga",
     "Puranpur",
     "Dubai",
+    "Sydney",
   ];
 
   @override

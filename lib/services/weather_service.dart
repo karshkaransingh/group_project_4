@@ -25,7 +25,8 @@ class WeatherService {
       final bool badWeather =
           mainWeather == "Rain" ||
           mainWeather == "Snow" ||
-          mainWeather == "Thunderstorm";
+          mainWeather == "Thunderstorm" ||
+          mainWeather == "Clouds";
 
       return {
         "success": true,
