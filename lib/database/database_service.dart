@@ -21,7 +21,7 @@ class DatabaseSevice {
 
     _database = await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
         CREATE TABLE users(
@@ -67,7 +67,16 @@ class DatabaseSevice {
           userId INTEGER,
           sportId INTEGER,
           exerciseId INTEGER,
-          date TEXT,
+          date TEXT
+        )
+        ''');
+
+        await db.execute('''
+        CREATE TABLE completed_exercises(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId INTEGER,
+          sportId INTEGER,
+          exerciseId INTEGER,
           UNIQUE(userId, sportId, exerciseId)
         )
         ''');
@@ -84,9 +93,40 @@ class DatabaseSevice {
         await db.execute(
           'CREATE INDEX idx_history_user_sport_exercise ON history(userId, sportId, exerciseId)',
         );
+        await db.execute(
+          'CREATE INDEX idx_completed_user_sport_exercise ON completed_exercises(userId, sportId, exerciseId)',
+        );
 
         await insertDefaultSports(db);
         await insertDefaultExercises(db);
+      },
+
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('''
+          CREATE TABLE completed_exercises(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER,
+            sportId INTEGER,
+            exerciseId INTEGER,
+            UNIQUE(userId, sportId, exerciseId)
+          )
+          ''');
+
+          await db.execute(
+            'CREATE INDEX idx_completed_user_sport_exercise ON completed_exercises(userId, sportId, exerciseId)',
+          );
+
+          List<Map<String, dynamic>> oldHistory = await db.query('history');
+
+          for (int i = 0; i < oldHistory.length; i++) {
+            await db.insert('completed_exercises', {
+              'userId': oldHistory[i]['userId'],
+              'sportId': oldHistory[i]['sportId'],
+              'exerciseId': oldHistory[i]['exerciseId'],
+            }, conflictAlgorithm: ConflictAlgorithm.ignore);
+          }
+        }
       },
     );
 
@@ -123,9 +163,6 @@ class DatabaseSevice {
 
   static Future<void> insertDefaultExercises(Database db) async {
     List<Exercise> exercises = [
-      // =========================
-      // BASKETBALL - OUTDOOR
-      // =========================
       Exercise(
         sportId: 1,
         name: "Dribbling Drill",
@@ -156,10 +193,6 @@ class DatabaseSevice {
         type: "outdoor",
         duration: 90,
       ),
-
-      // =========================
-      // BASKETBALL - INDOOR
-      // =========================
       Exercise(
         sportId: 1,
         name: "Wall Sit",
@@ -190,10 +223,6 @@ class DatabaseSevice {
         type: "indoor",
         duration: 40,
       ),
-
-      // =========================
-      // TENNIS - OUTDOOR
-      // =========================
       Exercise(
         sportId: 2,
         name: "Serve Practice",
@@ -222,10 +251,6 @@ class DatabaseSevice {
         type: "outdoor",
         duration: 40,
       ),
-
-      // =========================
-      // TENNIS - INDOOR
-      // =========================
       Exercise(
         sportId: 2,
         name: "Shadow Swings",
@@ -254,10 +279,6 @@ class DatabaseSevice {
         type: "indoor",
         duration: 60,
       ),
-
-      // =========================
-      // SOCCER - OUTDOOR
-      // =========================
       Exercise(
         sportId: 3,
         name: "Passing Drill",
@@ -286,10 +307,6 @@ class DatabaseSevice {
         type: "outdoor",
         duration: 20,
       ),
-
-      // =========================
-      // SOCCER - INDOOR
-      // =========================
       Exercise(
         sportId: 3,
         name: "Squats",
@@ -410,6 +427,20 @@ class DatabaseSevice {
       'sportId': sportId,
       'exerciseId': exerciseId,
       'date': date,
+    });
+  }
+
+  static Future<void> markExerciseCompleted(
+    int userId,
+    int sportId,
+    int exerciseId,
+  ) async {
+    Database db = await getDatabase();
+
+    await db.insert('completed_exercises', {
+      'userId': userId,
+      'sportId': sportId,
+      'exerciseId': exerciseId,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
@@ -477,7 +508,7 @@ class DatabaseSevice {
     List<Map<String, dynamic>> result = await db.rawQuery(
       '''
       SELECT COUNT(*) AS total
-      FROM history
+      FROM completed_exercises
       WHERE userId = ? AND sportId = ?
       ''',
       [userId, sportId],
@@ -494,7 +525,7 @@ class DatabaseSevice {
     Database db = await getDatabase();
 
     List<Map<String, dynamic>> result = await db.query(
-      'history',
+      'completed_exercises',
       where: 'userId = ? AND sportId = ? AND exerciseId = ?',
       whereArgs: [userId, sportId, exerciseId],
     );

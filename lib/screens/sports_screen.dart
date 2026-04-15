@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../database/database_service.dart';
+import '../widgets/sport_card.dart';
 import 'weather_workout_screen.dart';
 
 class SportsScreen extends StatefulWidget {
@@ -77,9 +78,12 @@ class _SportsScreenState extends State<SportsScreen> {
       itemBuilder: (context, index) {
         final sport = sports[index];
         final bool isFavorite = favoriteSportIds.contains(sport['id']);
-        final String imagePath = sport['image'];
 
-        return GestureDetector(
+        return SportCard(
+          sport: sport,
+
+          isFavorite: isFavorite,
+
           onTap: () {
             Navigator.push(
               context,
@@ -92,53 +96,10 @@ class _SportsScreenState extends State<SportsScreen> {
               ),
             );
           },
-          child: Container(
-            height: 180,
-            margin: const EdgeInsets.only(bottom: 18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                color: Colors.black.withOpacity(0.35),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        sport['name'],
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      await toggleFavorite(sport['id']);
-                    },
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+
+          onFavoriteToggle: () async {
+            await toggleFavorite(sport['id']);
+          },
         );
       },
     );

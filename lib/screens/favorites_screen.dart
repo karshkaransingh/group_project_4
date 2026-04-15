@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:group_project_4/main.dart';
 
 import '../database/database_service.dart';
+import '../widgets/favorite_card.dart';
 import 'home_screen.dart';
 import 'weather_workout_screen.dart';
 
@@ -114,87 +115,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget buildFavoriteCard(Map<String, dynamic> favorite) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-
-          MaterialPageRoute(
-            builder: (context) => WeatherWorkoutScreen(
-              userId: widget.userId,
-
-              sportId: favorite['sportId'],
-
-              sportName: favorite['name'],
-            ),
-          ),
-        );
-      },
-
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Color(0xFFFF5A5F)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFFF5A5F),
-              ),
-              child: const Icon(Icons.favorite, color: Colors.white, size: 30),
-            ),
-            const SizedBox(width: 16),
-
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    favorite['name'],
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    favorite['description'],
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            IconButton(
-              onPressed: () async {
-                await removeFavorite(favorite['id']);
-              },
-              icon: const Icon(
-                Icons.delete_outline,
-                color: Colors.redAccent,
-                size: 28,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -293,7 +213,26 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        ...favorites.map(buildFavoriteCard),
+                        ...favorites.map(
+                          (favorite) => FavoriteCard(
+                            favorite: favorite,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => WeatherWorkoutScreen(
+                                    userId: widget.userId,
+                                    sportId: favorite['sportId'],
+                                    sportName: favorite['name'],
+                                  ),
+                                ),
+                              );
+                            },
+                            onDelete: () async {
+                              await removeFavorite(favorite['id']);
+                            },
+                          ),
+                        ),
                         const SizedBox(height: 20),
                       ],
                     ),

@@ -97,22 +97,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
       exerciseId,
     );
 
-    if (!alreadyCompleted) {
-      String date = DateTime.now().toString();
+    String date = DateTime.now().toString();
 
-      await DatabaseSevice.addHistory(
+    await DatabaseSevice.addHistory(
+      widget.userId,
+      widget.sportId,
+      exerciseId,
+      date,
+    );
+
+    if (!alreadyCompleted) {
+      await DatabaseSevice.markExerciseCompleted(
         widget.userId,
         widget.sportId,
         exerciseId,
-        date,
       );
-
-      if (!mounted) return;
-
-      setState(() {
-        completedExercisesCount++;
-      });
     }
+
+    if (!mounted) return;
+
+    setState(() {
+      completedExercisesCount++;
+    });
   }
 
   void showFinishBlockedMessage() {
