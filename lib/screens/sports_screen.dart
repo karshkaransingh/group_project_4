@@ -18,12 +18,14 @@ class _SportsScreenState extends State<SportsScreen> {
   List<int> favoriteSportIds = [];
   bool isLoading = true;
 
+  // load sports and favorites on start
   @override
   void initState() {
     super.initState();
     loadData();
   }
 
+  // fetch sports and favorite ids
   Future<void> loadData() async {
     sports = await DatabaseSevice.getSports();
 
@@ -31,6 +33,7 @@ class _SportsScreenState extends State<SportsScreen> {
       widget.userId,
     );
 
+    // store favorite sport ids
     favoriteSportIds = favorites.map((item) => item['sportId'] as int).toList();
 
     if (!mounted) return;
@@ -40,9 +43,11 @@ class _SportsScreenState extends State<SportsScreen> {
     });
   }
 
+  // add or remove favorite
   Future<void> toggleFavorite(int sportId) async {
     bool isFavorite = favoriteSportIds.contains(sportId);
 
+    // remove favorite
     if (isFavorite) {
       await DatabaseSevice.removeFavoriteBySportId(widget.userId, sportId);
 
@@ -51,7 +56,9 @@ class _SportsScreenState extends State<SportsScreen> {
       setState(() {
         favoriteSportIds.remove(sportId);
       });
-    } else {
+    }
+    // add favorite
+    else {
       await DatabaseSevice.addFavorite(widget.userId, sportId);
 
       if (!mounted) return;
@@ -62,21 +69,28 @@ class _SportsScreenState extends State<SportsScreen> {
     }
   }
 
+  // main screen UI
   @override
   Widget build(BuildContext context) {
+    // loading state
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // no sports available
     if (sports.isEmpty) {
       return const Center(child: Text("No sports available"));
     }
 
+    // list of sport cards
     return ListView.builder(
       padding: const EdgeInsets.all(16),
+
       itemCount: sports.length,
+
       itemBuilder: (context, index) {
         final sport = sports[index];
+
         final bool isFavorite = favoriteSportIds.contains(sport['id']);
 
         return SportCard(
@@ -84,19 +98,24 @@ class _SportsScreenState extends State<SportsScreen> {
 
           isFavorite: isFavorite,
 
+          // open workout screen
           onTap: () {
             Navigator.push(
               context,
+
               MaterialPageRoute(
                 builder: (context) => WeatherWorkoutScreen(
                   userId: widget.userId,
+
                   sportId: sport['id'],
+
                   sportName: sport['name'],
                 ),
               ),
             );
           },
 
+          // toggle favorite icon
           onFavoriteToggle: () async {
             await toggleFavorite(sport['id']);
           },

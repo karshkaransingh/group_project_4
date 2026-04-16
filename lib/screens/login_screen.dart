@@ -12,13 +12,16 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // controllers for input fields
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  // login function
   Future<void> loginUser() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
+    // check if fields empty
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -27,22 +30,30 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // check user credentials in database
     var user = await DatabaseSevice.signin(email, password);
 
+    // login success
     if (user.isNotEmpty) {
       Navigator.pushReplacement(
         context,
+
         MaterialPageRoute(
-          builder: (context) => HomeScreen(userId: user[0]['id']),
+          builder: (context) => HomeScreen(
+            userId: user[0]['id'], // pass logged user id
+          ),
         ),
       );
-    } else {
+    }
+    // login failed
+    else {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Invalid login")));
     }
   }
 
+  // input field style
   InputDecoration input(String text) {
     return InputDecoration(
       labelText: text,
@@ -58,14 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
 
-        borderSide: const BorderSide(
-          color: Color(0xFF61D4C0), // mint color
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: Color(0xFF61D4C0), width: 2),
       ),
     );
   }
 
+  // main screen UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,9 +87,9 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
+            // app title
             const Text(
               "SPORTFIT",
-
               style: TextStyle(
                 fontSize: 42,
                 fontWeight: FontWeight.bold,
@@ -90,6 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 12),
 
+            // gym icon
             const Icon(
               Icons.fitness_center,
               size: 85,
@@ -98,14 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
             const SizedBox(height: 12),
 
+            // slogan text
             const Text(
               "MAKES SURE YOU FIT",
-
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
             ),
 
             const SizedBox(height: 35),
 
+            // login card container
             Container(
               padding: const EdgeInsets.all(22),
 
@@ -117,28 +128,36 @@ class _LoginScreenState extends State<LoginScreen> {
 
               child: Column(
                 children: [
+                  // email field
                   TextField(
                     controller: emailController,
+
                     style: const TextStyle(fontSize: 18),
+
                     decoration: input("Email"),
                   ),
 
                   const SizedBox(height: 18),
 
+                  // password field
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
+
+                    obscureText: true, // hide password
+
                     style: const TextStyle(fontSize: 18),
+
                     decoration: input("Password"),
                   ),
 
                   const SizedBox(height: 22),
 
+                  // sign in button
                   SizedBox(
                     width: double.infinity,
 
                     child: ElevatedButton(
-                      onPressed: loginUser,
+                      onPressed: loginUser, // call login
 
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF61D4C0),
@@ -153,7 +172,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         style: TextStyle(
                           fontSize: 18,
+
                           fontWeight: FontWeight.bold,
+
                           color: Colors.white,
                         ),
                       ),
@@ -162,10 +183,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 12),
 
+                  // navigate to signup
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
+
                         MaterialPageRoute(
                           builder: (context) => const SignupScreen(),
                         ),
@@ -177,7 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       style: TextStyle(
                         fontSize: 17,
+
                         fontWeight: FontWeight.w600,
+
                         color: Colors.black,
                       ),
                     ),

@@ -17,15 +17,18 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // current selected tab index
   late int selectedIndex;
 
+  // list of screens for bottom navigation
   late List<Widget> pages;
 
+  // initialize selected tab and pages
   @override
   void initState() {
     super.initState();
 
-    selectedIndex = widget.initialIndex;
+    selectedIndex = widget.initialIndex; // set starting tab
 
     pages = [
       SportsScreen(userId: widget.userId),
@@ -38,26 +41,28 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  // main screen UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colorbg,
 
+      // top app bar
       appBar: AppBar(
         backgroundColor: const Color(0xFFD4F24C),
 
         title: Text(
           "SPORTFIT",
-
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
 
         centerTitle: true,
 
+        // dark mode toggle button
         actions: [
           IconButton(
             onPressed: () {
-              isDarkMode.value = !isDarkMode.value;
+              isDarkMode.value = !isDarkMode.value; // toggle theme
             },
 
             icon: Icon(
@@ -69,8 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
+      // display selected page
       body: pages[selectedIndex],
 
+      // bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: colorbg,
 
@@ -80,31 +87,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
         currentIndex: selectedIndex,
 
+        // change tab
         onTap: (value) {
           setState(() {
-            selectedIndex = value;
+            selectedIndex = value; // update selected tab
           });
         },
 
         items: const [
+          // sports tab
           BottomNavigationBarItem(
             icon: Icon(Icons.sports),
             label: "Sports",
             backgroundColor: Color(0xFFD4F24C),
           ),
 
+          // favorites tab
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: "Favorites",
             backgroundColor: Color(0xFFD4F24C),
           ),
 
+          // history tab
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
             label: "History",
             backgroundColor: Color(0xFFD4F24C),
           ),
 
+          // progress tab
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: "Progress",
