@@ -8,23 +8,32 @@ import '../models/sport.dart';
 import '../models/exercise.dart';
 import '../models/user.dart';
 
+// database service class
 class DatabaseSevice {
-  static Database? _database; // database instance
+  // database instance
+  static Database? _database;
 
+  // create or return database
   static Future<Database> getDatabase() async {
+    // return existing database
     if (_database != null) {
-      return _database!; // return existing db
+      return _database!;
     }
 
-    Directory dbDirectory =
-        await getApplicationDocumentsDirectory(); // app storage location
-    String path = join(dbDirectory.path, "sportfit.db"); // database file path
+    // get app storage path
+    Directory dbDirectory = await getApplicationDocumentsDirectory();
 
+    // database file path
+    String path = join(dbDirectory.path, "sportfit.db");
+
+    // open database
     _database = await openDatabase(
       path,
 
-      version: 2, // database version
+      // database version
+      version: 2,
 
+      // create database tables
       onCreate: (db, version) async {
         // users table
         await db.execute('''
@@ -64,11 +73,11 @@ class DatabaseSevice {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           userId INTEGER,
           sportId INTEGER,
-          UNIQUE(userId, sportId) // avoid duplicate favorites
+          UNIQUE(userId, sportId)
         )
         ''');
 
-        // workout history table
+        // history table
         await db.execute('''
         CREATE TABLE history(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,18 +88,18 @@ class DatabaseSevice {
         )
         ''');
 
-        // completed exercises for progress tracking
+        // progress table
         await db.execute('''
         CREATE TABLE completed_exercises(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           userId INTEGER,
           sportId INTEGER,
           exerciseId INTEGER,
-          UNIQUE(userId, sportId, exerciseId) // unique progress record
+          UNIQUE(userId, sportId, exerciseId)
         )
         ''');
 
-        // indexes for faster queries
+        // indexes
         await db.execute(
           'CREATE INDEX idx_exercises_sportId ON exercises(sportId)',
         );
@@ -111,14 +120,15 @@ class DatabaseSevice {
           'CREATE INDEX idx_completed_user_sport_exercise ON completed_exercises(userId, sportId, exerciseId)',
         );
 
-        await insertDefaultSports(db); // insert sports data
-
-        await insertDefaultExercises(db); // insert exercises data
+        // insert default data
+        await insertDefaultSports(db);
+        await insertDefaultExercises(db);
       },
 
+      // upgrade old database
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          // create completed table when upgrading
+          // create completed table
           await db.execute('''
           CREATE TABLE completed_exercises(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,16 +139,16 @@ class DatabaseSevice {
           )
           ''');
 
+          // create index
           await db.execute(
             'CREATE INDEX idx_completed_user_sport_exercise ON completed_exercises(userId, sportId, exerciseId)',
           );
 
-          List<Map<String, dynamic>> oldHistory = await db.query(
-            'history',
-          ); // old history records
+          // get old history records
+          List<Map<String, dynamic>> oldHistory = await db.query('history');
 
+          // move old history into progress table
           for (int i = 0; i < oldHistory.length; i++) {
-            // move old history data to completed table
             await db.insert('completed_exercises', {
               'userId': oldHistory[i]['userId'],
               'sportId': oldHistory[i]['sportId'],
@@ -152,6 +162,7 @@ class DatabaseSevice {
     return _database!;
   }
 
+  // insert default sports
   static Future<void> insertDefaultSports(Database db) async {
     List<Sport> sports = [
       Sport(
@@ -173,18 +184,20 @@ class DatabaseSevice {
       ),
     ];
 
-    Batch batch = db.batch(); // batch insert
+    // batch insert
+    Batch batch = db.batch();
 
     for (int i = 0; i < sports.length; i++) {
-      batch.insert('sports', sports[i].toMap()); // insert each sport
+      batch.insert('sports', sports[i].toMap());
     }
 
     await batch.commit(noResult: true);
   }
 
+  // insert default exercises
   static Future<void> insertDefaultExercises(Database db) async {
     List<Exercise> exercises = [
-      // basketball outdoor exercises
+      // basketball outdoor
       Exercise(
         sportId: 1,
         name: "Dribbling Drill",
@@ -219,7 +232,7 @@ class DatabaseSevice {
         duration: 90,
       ),
 
-      // basketball indoor exercises
+      // basketball indoor
       Exercise(
         sportId: 1,
         name: "Wall Sit",
@@ -387,21 +400,23 @@ class DatabaseSevice {
       ),
     ];
 
+    // batch insert
     Batch batch = db.batch();
 
     for (int i = 0; i < exercises.length; i++) {
-      batch.insert('exercises', exercises[i].toMap()); // insert exercises
+      batch.insert('exercises', exercises[i].toMap());
     }
 
     await batch.commit(noResult: true);
   }
 
+  // create user
   static Future<int> signup(User user) async {
     Database db = await getDatabase();
-
-    return await db.insert('users', user.toMap()); // create user
+    return await db.insert('users', user.toMap());
   }
 
+  // sign in user
   static Future<List<Map<String, dynamic>>> signin(
     String email,
     String password,
@@ -410,17 +425,18 @@ class DatabaseSevice {
 
     return await db.query(
       'users',
-      where: 'email = ? AND password = ?', // match login
+      where: 'email = ? AND password = ?',
       whereArgs: [email, password],
     );
   }
 
+  // get all sports
   static Future<List<Map<String, dynamic>>> getSports() async {
     Database db = await getDatabase();
-
-    return await db.query('sports'); // fetch sports
+    return await db.query('sports');
   }
 
+  // get exercises by sport
   static Future<List<Map<String, dynamic>>> getExercisesBySport(
     int sportId,
   ) async {
@@ -428,23 +444,22 @@ class DatabaseSevice {
 
     return await db.query(
       'exercises',
-      where: 'sportId = ?', // filter by sport
+      where: 'sportId = ?',
       whereArgs: [sportId],
     );
   }
 
+  // add favorite
   static Future<void> addFavorite(int userId, int sportId) async {
     Database db = await getDatabase();
 
-    await db.insert(
-      'favorites',
-
-      {'userId': userId, 'sportId': sportId},
-
-      conflictAlgorithm: ConflictAlgorithm.ignore, // avoid duplicate favorite
-    );
+    await db.insert('favorites', {
+      'userId': userId,
+      'sportId': sportId,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
+  // get favorites
   static Future<List<Map<String, dynamic>>> getFavorites(int userId) async {
     Database db = await getDatabase();
 
@@ -455,11 +470,11 @@ class DatabaseSevice {
       INNER JOIN sports ON favorites.sportId = sports.id
       WHERE favorites.userId = ?
       ''',
-
       [userId],
     );
   }
 
+  // delete favorite by id
   static Future<int> deleteFavorite(int favoriteId) async {
     Database db = await getDatabase();
 
@@ -470,6 +485,7 @@ class DatabaseSevice {
     );
   }
 
+  // save history
   static Future<void> addHistory(
     int userId,
     int sportId,
@@ -483,9 +499,10 @@ class DatabaseSevice {
       'sportId': sportId,
       'exerciseId': exerciseId,
       'date': date,
-    }); // save workout history
+    });
   }
 
+  // mark exercise completed
   static Future<void> markExerciseCompleted(
     int userId,
     int sportId,
@@ -493,15 +510,14 @@ class DatabaseSevice {
   ) async {
     Database db = await getDatabase();
 
-    await db.insert(
-      'completed_exercises',
-
-      {'userId': userId, 'sportId': sportId, 'exerciseId': exerciseId},
-
-      conflictAlgorithm: ConflictAlgorithm.ignore, // avoid duplicate progress
-    );
+    await db.insert('completed_exercises', {
+      'userId': userId,
+      'sportId': sportId,
+      'exerciseId': exerciseId,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
+  // get history
   static Future<List<Map<String, dynamic>>> getHistory(int userId) async {
     Database db = await getDatabase();
 
@@ -522,17 +538,58 @@ class DatabaseSevice {
     WHERE history.userId = ?
     ORDER BY history.date DESC
     ''',
-
       [userId],
     );
   }
 
+  // delete history and update progress
   static Future<int> deleteHistory(int historyId) async {
     Database db = await getDatabase();
 
-    return await db.delete('history', where: 'id = ?', whereArgs: [historyId]);
+    // get history record
+    List<Map<String, dynamic>> historyItem = await db.query(
+      'history',
+      where: 'id = ?',
+      whereArgs: [historyId],
+    );
+
+    // stop if not found
+    if (historyItem.isEmpty) {
+      return 0;
+    }
+
+    // store ids
+    int userId = historyItem[0]['userId'] as int;
+    int sportId = historyItem[0]['sportId'] as int;
+    int exerciseId = historyItem[0]['exerciseId'] as int;
+
+    // delete row
+    int deletedCount = await db.delete(
+      'history',
+      where: 'id = ?',
+      whereArgs: [historyId],
+    );
+
+    // check same exercise in history
+    List<Map<String, dynamic>> remainingHistory = await db.query(
+      'history',
+      where: 'userId = ? AND sportId = ? AND exerciseId = ?',
+      whereArgs: [userId, sportId, exerciseId],
+    );
+
+    // remove from progress if last one
+    if (remainingHistory.isEmpty) {
+      await db.delete(
+        'completed_exercises',
+        where: 'userId = ? AND sportId = ? AND exerciseId = ?',
+        whereArgs: [userId, sportId, exerciseId],
+      );
+    }
+
+    return deletedCount;
   }
 
+  // check favorite
   static Future<List<Map<String, dynamic>>> checkFavorite(
     int userId,
     int sportId,
@@ -541,11 +598,12 @@ class DatabaseSevice {
 
     return await db.query(
       'favorites',
-      where: 'userId = ? AND sportId = ?', // check favorite exists
+      where: 'userId = ? AND sportId = ?',
       whereArgs: [userId, sportId],
     );
   }
 
+  // get total exercises of sport
   static Future<int> getTotalExercisesCount(int sportId) async {
     Database db = await getDatabase();
 
@@ -555,13 +613,13 @@ class DatabaseSevice {
       FROM exercises
       WHERE sportId = ?
       ''',
-
       [sportId],
     );
 
-    return result[0]['total'] as int; // total exercises per sport
+    return result[0]['total'] as int;
   }
 
+  // get completed exercises count
   static Future<int> getCompletedExercisesCount(int userId, int sportId) async {
     Database db = await getDatabase();
 
@@ -571,13 +629,13 @@ class DatabaseSevice {
       FROM completed_exercises
       WHERE userId = ? AND sportId = ?
       ''',
-
       [userId, sportId],
     );
 
-    return result[0]['total'] as int; // completed count for progress
+    return result[0]['total'] as int;
   }
 
+  // check if exercise already completed
   static Future<bool> isExerciseAlreadyCompleted(
     int userId,
     int sportId,
@@ -587,23 +645,20 @@ class DatabaseSevice {
 
     List<Map<String, dynamic>> result = await db.query(
       'completed_exercises',
-
       where: 'userId = ? AND sportId = ? AND exerciseId = ?',
-
       whereArgs: [userId, sportId, exerciseId],
     );
 
-    return result.isNotEmpty; // check progress already saved
+    return result.isNotEmpty;
   }
 
+  // remove favorite by sport id
   static Future<int> removeFavoriteBySportId(int userId, int sportId) async {
     Database db = await getDatabase();
 
     return await db.delete(
       'favorites',
-
       where: 'userId = ? AND sportId = ?',
-
       whereArgs: [userId, sportId],
     );
   }
