@@ -16,8 +16,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-    // wait 2 seconds then open login screen
-    Timer(const Duration(seconds: 2), () {
+    // wait 5 seconds then open login screen
+    Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
 
