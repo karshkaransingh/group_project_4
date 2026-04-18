@@ -12,13 +12,9 @@ class SportCard extends StatelessWidget {
 
   const SportCard({
     super.key,
-
     required this.sport,
-
     required this.isFavorite,
-
     required this.onTap,
-
     required this.onFavoriteToggle,
   });
 
@@ -33,63 +29,77 @@ class SportCard extends StatelessWidget {
 
       child: Container(
         height: 180,
-
         margin: const EdgeInsets.only(bottom: 18),
 
-        decoration: BoxDecoration(
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
+
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
 
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-
-            fit: BoxFit.cover,
-          ),
-        ),
-
-        child: Container(
-          padding: const EdgeInsets.all(18),
-
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-
-            color: Colors.black.withOpacity(0.35), // dark overlay
-          ),
-
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
+            fit: StackFit.expand,
 
             children: [
-              // sport name
-              Expanded(
-                child: Align(
-                  alignment: Alignment.bottomLeft,
+              // sport image
+              Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
 
-                  child: Text(
-                    sport['name'],
+                // fallback if image missing
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: const Color(0xFF29433E),
 
-                    style: const TextStyle(
-                      fontSize: 28,
-
-                      fontWeight: FontWeight.bold,
-
-                      color: Colors.white,
-
-                      decoration: TextDecoration.none,
+                    child: const Center(
+                      child: Icon(Icons.sports, color: Colors.white, size: 40),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
 
-              // favorite icon button
-              IconButton(
-                onPressed: onFavoriteToggle,
+              // dark overlay (UNCHANGED)
+              Container(
+                padding: const EdgeInsets.all(18),
 
-                icon: Icon(
-                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  color: Colors.black.withOpacity(0.35),
+                ),
 
-                  color: Colors.white,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
-                  size: 30,
+                  children: [
+                    // sport name
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+
+                        child: Text(
+                          sport['name'],
+
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // favorite icon button
+                    IconButton(
+                      onPressed: onFavoriteToggle,
+
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

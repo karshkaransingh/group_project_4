@@ -31,6 +31,16 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    // check if email exists
+    bool exists = await DatabaseSevice.emailExists(email);
+
+    if (exists) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Email already registered")));
+      return;
+    }
+
     // create user object
     User user = User(username: username, email: email, password: password);
 
@@ -214,5 +224,13 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }

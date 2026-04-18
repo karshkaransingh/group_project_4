@@ -11,27 +11,38 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  // start timer and navigate to login screen
+  // timer to control splash duration
+  Timer? splashTimer;
+
+  // start timer when screen loads
   @override
   void initState() {
     super.initState();
 
-    // wait 5 seconds then open login screen
-    Timer(const Duration(seconds: 5), () {
+    // wait 5 seconds then navigate to login screen
+    splashTimer = Timer(const Duration(seconds: 5), () {
+      // check if screen still exists before navigating
+      if (!mounted) return;
+
+      // replace splash with login screen
       Navigator.pushReplacement(
         context,
-
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     });
   }
 
-  // main splash UI
+  // cancel timer when splash screen is removed
+  @override
+  void dispose() {
+    splashTimer?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        // center content
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
 
@@ -41,15 +52,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
             SizedBox(height: 20),
 
-            // app title
+            // app title text
             Text(
               "SPORTFIT",
 
               style: TextStyle(
                 fontSize: 34,
-
                 fontWeight: FontWeight.bold,
-
                 color: Color(0xFF29433E),
               ),
             ),

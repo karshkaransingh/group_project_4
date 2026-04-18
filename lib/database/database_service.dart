@@ -40,7 +40,7 @@ class DatabaseSevice {
         CREATE TABLE users(
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           username TEXT,
-          email TEXT,
+          email TEXT UNIQUE,
           password TEXT
         )
         ''');
@@ -414,6 +414,19 @@ class DatabaseSevice {
   static Future<int> signup(User user) async {
     Database db = await getDatabase();
     return await db.insert('users', user.toMap());
+  }
+
+  // check if email already exists
+  static Future<bool> emailExists(String email) async {
+    Database db = await getDatabase();
+
+    final result = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    return result.isNotEmpty;
   }
 
   // sign in user

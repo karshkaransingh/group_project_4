@@ -33,6 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
     // check user credentials in database
     var user = await DatabaseSevice.signin(email, password);
 
+    if (!mounted) return;
+
     // login success
     if (user.isNotEmpty) {
       Navigator.pushReplacement(
@@ -214,5 +216,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
