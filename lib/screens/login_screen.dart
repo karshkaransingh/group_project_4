@@ -12,6 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // form key for validation
+  final _formKey = GlobalKey<FormState>();
+
   // controllers for input fields
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -20,15 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> loginUser() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
-
-    // check if fields empty
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Fill all fields")));
-
-      return;
-    }
 
     // check user credentials in database
     var user = await DatabaseSevice.signin(email, password);
@@ -39,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user.isNotEmpty) {
       Navigator.pushReplacement(
         context,
-
         MaterialPageRoute(
           builder: (context) => HomeScreen(
             userId: user[0]['id'], // pass logged user id
@@ -59,35 +52,25 @@ class _LoginScreenState extends State<LoginScreen> {
   InputDecoration input(String text) {
     return InputDecoration(
       labelText: text,
-
       labelStyle: const TextStyle(fontSize: 18),
-
       filled: true,
-
       fillColor: Colors.white,
-
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-
         borderSide: const BorderSide(color: Color(0xFF61D4C0), width: 2),
       ),
     );
   }
 
-  // main screen UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F7),
-
       body: Padding(
         padding: const EdgeInsets.all(24),
-
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-
           children: [
             // app title
             const Text(
@@ -121,95 +104,103 @@ class _LoginScreenState extends State<LoginScreen> {
             // login card container
             Container(
               padding: const EdgeInsets.all(22),
-
               decoration: BoxDecoration(
                 border: Border.all(color: const Color(0xFF61D4C0)),
-
                 borderRadius: BorderRadius.circular(18),
               ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // email field
+                    TextFormField(
+                      controller: emailController,
+                      style: const TextStyle(fontSize: 18),
+                      decoration: input("Email"),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Enter email";
+                        }
 
-              child: Column(
-                children: [
-                  // email field
-                  TextField(
-                    controller: emailController,
+                        if (!value.contains("@")) {
+                          return "Invalid email";
+                        }
 
-                    style: const TextStyle(fontSize: 18),
+                        return null;
+                      },
+                    ),
 
-                    decoration: input("Email"),
-                  ),
+                    const SizedBox(height: 18),
 
-                  const SizedBox(height: 18),
+                    // password field
+                    TextFormField(
+                      controller: passwordController,
+                      obscureText: true, // hide password
+                      style: const TextStyle(fontSize: 18),
+                      decoration: input("Password"),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return "Enter password";
+                        }
 
-                  // password field
-                  TextField(
-                    controller: passwordController,
+                        if (value.length < 6) {
+                          return "Min 6 characters";
+                        }
 
-                    obscureText: true, // hide password
+                        return null;
+                      },
+                    ),
 
-                    style: const TextStyle(fontSize: 18),
+                    const SizedBox(height: 22),
 
-                    decoration: input("Password"),
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  // sign in button
-                  SizedBox(
-                    width: double.infinity,
-
-                    child: ElevatedButton(
-                      onPressed: loginUser, // call login
-
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF61D4C0),
-
-                        foregroundColor: Colors.black,
-
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                    // sign in button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            loginUser();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF61D4C0),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          "Sign In",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
+                    ),
 
+                    const SizedBox(height: 12),
+
+                    // navigate to signup
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignupScreen(),
+                          ),
+                        );
+                      },
                       child: const Text(
-                        "Sign In",
-
+                        "Sign Up",
                         style: TextStyle(
-                          fontSize: 18,
-
-                          fontWeight: FontWeight.bold,
-
-                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // navigate to signup
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-
-                        MaterialPageRoute(
-                          builder: (context) => const SignupScreen(),
-                        ),
-                      );
-                    },
-
-                    child: const Text(
-                      "Sign Up",
-
-                      style: TextStyle(
-                        fontSize: 17,
-
-                        fontWeight: FontWeight.w600,
-
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
